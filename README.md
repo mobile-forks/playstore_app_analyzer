@@ -1,5 +1,5 @@
 # Synopsis
-node index.js [--local | --[hideActivities|ha] | --[notExtractApk|na] --[keepFile|kf] | --appId app.id]
+`node index.js [--local | --[hideActivities|ha] | --[notExtractApk|na] --[keepFile|kf] | --appId app.id]`
 
 # Description
 Will download APKs from the store or use local APKs and analyse them.
@@ -11,9 +11,9 @@ If it is a Cordova/Phonegap app it will check for a www/ folder and copy this to
 # Usage
 * clone the repo
 * run `npm install`
-* Open the config_sample.js and insert your Playstore account. Save it to config.js
-* set the androidId (e.g. use https://play.google.com/store/apps/details?id=com.evozi.deviceid)
-* change the playstore settings (see https://github.com/facundoolano/google-play-scraper/blob/dev/lib/constants.js#L3 for values)
+* Open the `config_sample.js` and insert your Playstore account. Save it to `config.js`
+* set the `androidId` (e.g. use https://play.google.com/store/apps/details?id=com.evozi.deviceid) in `config.js`
+* change the playstore settings (see https://github.com/facundoolano/google-play-scraper/blob/dev/lib/constants.js#L3 for values) in `config.js`
 * run `node index.js`
 
 
