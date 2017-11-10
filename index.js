@@ -20,6 +20,10 @@ var files = [];
 var apkFolder = "./apk/";
 var wwwFolder = "./www/";
 var isLocal = false;
+if (!fs.existsSync("config.js")) {
+	console.error("Please create a config.js first".red);
+	process.exit();
+}
 var cfg = require("./config");
 var framework = "";
 var listActivities = true;
