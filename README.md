@@ -1,6 +1,6 @@
 # Playstore App Analyzer
 # Synopsis
-`node index.js [--local | --[hideActivities|ha] | --[notExtractApk|na] --[keepFile|kf] | --appId app.id]`
+`node index.js [--local | --[hideActivities|ha] | --[notExtractApk|na] --[keepFile|kf] | --appId app.id] | --similar num`
 
 # Description
 Will download APKs from the store or use local APKs and analyze them.
@@ -55,3 +55,4 @@ Checking ./apk/appinventor.app.id.apk
 * `--notExtractApk | --na`<br>Don't extract the APK (only Activity names are shown)
 * `--local`<br>parse the local apk/ folder
 * `--appId com.abc.def`<br>download app and anlyse it
+* `--similar 2`<br>Add 2 similar apps to the download list

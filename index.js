@@ -28,6 +28,9 @@ var isForce = false;
 var appId = "";
 var Database = require('better-sqlite3');
 var db = new Database('database.db');
+var ora = require('ora');
+var spinner = ora('');
+
 try {
 	if (db.prepare("SELECT version FROM apps").get() != 1) {
 		// migrate
@@ -97,6 +100,7 @@ function outputText(txt) {
 function downloadToFile(pkg, vc) {
 	var dldSize = 0;
 	appId = pkg;
+
 	return api.details(pkg).then(function(res) {
 			dldSize = (res.details.appDetails.installationSize.low / 1024 / 1024).toPrecision(2) + "Mb"
 			return vc || res.details.appDetails.versionCode;
@@ -110,8 +114,10 @@ function downloadToFile(pkg, vc) {
 				console.log("\tDownload size: " + dldSize);
 				var fStream = fs.createWriteStream(fname);
 				return api.download(pkg, versionCode).then(function(res) {
+					spinner.start("\tDownloading...");
 					res.pipe(fStream);
 					fStream.on('finish', function() {
+						spinner.stop();
 						db.prepare("INSERT INTO apps VALUES ('" + pkg + "','', " + new Date().getTime() + ")").run();
 						checkApk(fname, listActivities);
 					});
@@ -184,7 +190,7 @@ function checkApk(name, showActivities = false) {
 function download(id) {
 	var app = appList[id];
 	if (app) {
-		outputText("Download " + (id + 1) + ": " + app.title)
+		outputText("Download " + (id + 1) + "/" + appList.length + ": " + app.title)
 		downloadToFile(app.appId, "");
 	}
 }
@@ -240,6 +246,30 @@ function apkDecompile(file) {
 						fs.copySync("_out/assets/www", wwwFolder + file);
 						setFramework("Cordova");
 					}
+
+					// find xamarin
+					var obj = {
+						'term': /xamarin/,
+						'flags': 'ig'
+					};
+					findInFiles.find(obj, '_out/', 'apktool.xml$')
+						.then(function(results) {
+							if (results.length > 0) {
+								setFramework("Xamarin");
+							}
+						});
+
+					// find Appcelerator
+					var obj = {
+						'term': /org\/appcelerator\/titanium/,
+						'flags': 'ig'
+					};
+					findInFiles.find(obj, '_out/', 'apktool.xml$')
+						.then(function(results) {
+							if (results.length > 0) {
+								setFramework("Axway Appcelerator");
+							}
+						});
 
 					// output urls
 					var obj = {
@@ -321,6 +351,26 @@ if (argv.local) {
 		})
 		.then(function(data) {
 			appList = data;
-			download(currentDownload);
+
+			var oldLen = appList.length;
+			var appCount = 0;
+			if (argv.similar) {
+				spinner.start("Get similar apps");
+				appList.forEach(function(item) {
+					gplay.similar({
+						appId: item.appId
+					}).then(function(data) {
+						appList = appList.concat(data.slice(0, argv.similar));
+						appCount++;
+						spinner.start("Get similar apps " + appCount + "/" + (oldLen - 1));
+						if (appCount > oldLen - 1) {
+							spinner.stop();
+							download(currentDownload);
+						}
+					});
+				});
+			} else {
+				download(currentDownload);
+			}
 		}, {});
 }
