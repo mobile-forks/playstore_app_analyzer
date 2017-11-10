@@ -9,6 +9,8 @@ To safe space it will set the filesyste to 0 at the end so it won't be downloade
 If it is a Cordova/Phonegap app it will check for a www/ folder and copy this to www/ so you can analyse it later on.
 
 # Usage
+* clone the repo
+* run `npm install`
 * Open the config_sample.js and insert your Playstore account. Save it to config.js
 * set the androidId (e.g. use https://play.google.com/store/apps/details?id=com.evozi.deviceid)
 * change the playstore settings (see https://github.com/facundoolano/google-play-scraper/blob/dev/lib/constants.js#L3 for values)
