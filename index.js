@@ -70,21 +70,19 @@ var api = require('gpapi').GooglePlayAPI({
 	androidId: cfg.androidId
 });
 
-// var http = require('http');
-// http.createServer(function(req, res) {
-// 	res.write('<html><head></head><body>');
-// 	res.write('<p>Write your HTML content here</p>');
-// 	res.end('</body></html>');
-// }).listen(1337);
-
 console.log("--------");
 console.log("Settings");
 console.log("--------");
 console.log("Logfile: " + logFile);
-console.log("Collection: " + COLLECTION);
-console.log("Category: " + CATEGORY);
-console.log("Country: " + COUNTRY);
-console.log("Amount: " + DOWNLOAD_COUNT);
+
+if (argv.appId) {
+	console.log("Download: " + argv.appId);
+} else {
+	console.log("Collection: " + COLLECTION);
+	console.log("Category: " + CATEGORY);
+	console.log("Country: " + COUNTRY);
+	console.log("Amount: " + DOWNLOAD_COUNT);
+}
 console.log("")
 
 function outputText(txt) {
@@ -252,9 +250,9 @@ function apkDecompile(file) {
 						'term': /xamarin/,
 						'flags': 'ig'
 					};
-					findInFiles.find(obj, '_out/', 'apktool.xml$')
+					findInFiles.find(obj, '_out/', 'apktool.yml$')
 						.then(function(results) {
-							if (results.length > 0) {
+							if (results[Object.keys(results)[0]].count > 0) {
 								setFramework("Xamarin");
 							}
 						});
@@ -264,9 +262,9 @@ function apkDecompile(file) {
 						'term': /org\/appcelerator\/titanium/,
 						'flags': 'ig'
 					};
-					findInFiles.find(obj, '_out/', 'apktool.xml$')
+					findInFiles.find(obj, '_out/', 'apktool.yml$')
 						.then(function(results) {
-							if (results.length > 0) {
+							if (results[Object.keys(results)[0]].count > 0) {
 								setFramework("Axway Appcelerator");
 							}
 						});
