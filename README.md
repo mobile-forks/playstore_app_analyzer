@@ -1,12 +1,13 @@
+# Playstore App Analyzer
 # Synopsis
 `node index.js [--local | --[hideActivities|ha] | --[notExtractApk|na] --[keepFile|kf] | --appId app.id]`
 
 # Description
-Will download APKs from the store or use local APKs and analyse them.
+Will download APKs from the store or use local APKs and analyze them.
 It will print out Acitivity names and urls that are found in the XML files.
 To safe space it will set the filesyste to 0 at the end so it won't be downloaded again.
 
-If it is a Cordova/Phonegap app it will check for a www/ folder and copy this to www/ so you can analyse it later on.
+If it is a Cordova/Phonegap app it will check for a www/ folder and copy this to www/ so you can analyze it later on.
 
 # Usage
 * clone the repo
