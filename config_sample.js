@@ -8,4 +8,4 @@ exports.androidId = "android_id";
 exports.category = gplay.category.AUTO_AND_VEHICLES;
 exports.collection = gplay.collection.NEW_FREE;
 exports.downloadCount = 40;
-exoprts.country = "de";
+exports.country = "de";
