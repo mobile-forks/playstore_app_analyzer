@@ -252,8 +252,11 @@ function apkDecompile(file) {
 					};
 					findInFiles.find(obj, '_out/', 'apktool.yml$')
 						.then(function(results) {
-							if (results[Object.keys(results)[0]].count > 0) {
-								setFramework("Xamarin");
+							for (var result in results) {
+								var res = results[result];
+								if (res.count > 0) {
+									setFramework("Xamarin");
+								}
 							}
 						});
 
@@ -264,8 +267,11 @@ function apkDecompile(file) {
 					};
 					findInFiles.find(obj, '_out/', 'apktool.yml$')
 						.then(function(results) {
-							if (results[Object.keys(results)[0]].count > 0) {
-								setFramework("Axway Appcelerator");
+							for (var result in results) {
+								var res = results[result];
+								if (res.count > 0) {
+									setFramework("Axway Appcelerator");
+								}
 							}
 						});
 
