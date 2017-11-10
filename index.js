@@ -24,8 +24,20 @@ var cfg = require("./config");
 var framework = "";
 var listActivities = true;
 var logFile = "log_" + (new Date().getTime()) + ".html";
+var isForce = false;
+var appId = "";
+var Database = require('better-sqlite3');
+var db = new Database('database.db');
+try {
+	if (db.prepare("SELECT version FROM apps").get() != 1) {
+		// migrate
+	}
+} catch (error) {
+	//
+}
+db.prepare("CREATE TABLE IF NOT EXISTS apps (appId TEXT, framework TEXT, date INT)").run();
 
-var CATEGORY =  gplay.category[cfg.category];
+var CATEGORY = gplay.category[cfg.category];
 var COLLECTION = gplay.collection[cfg.collection]
 var DOWNLOAD_COUNT = cfg.downloadCount;
 var COUNTRY = cfg.country;
@@ -71,6 +83,7 @@ console.log("Category: " + CATEGORY);
 console.log("Country: " + COUNTRY);
 console.log("Amount: " + DOWNLOAD_COUNT);
 console.log("")
+
 function outputText(txt) {
 	console.log(txt.split("--").join("\t").split("<br>").join("\n").replace("<hr>", "\n"));
 
@@ -82,45 +95,50 @@ function outputText(txt) {
 }
 
 function downloadToFile(pkg, vc) {
+	var dldSize = 0;
+	appId = pkg;
 	return api.details(pkg).then(function(res) {
+			dldSize = (res.details.appDetails.installationSize.low / 1024 / 1024).toPrecision(2) + "Mb"
 			return vc || res.details.appDetails.versionCode;
 		})
 		.then(function(versionCode) {
 			var fname = apkFolder + pkg + '.apk';
-			fs.stat(fname, function(err, stat) {
-				if (err == null) {
-					outputText("--File exists - skipping");
-					getNext();
-				} else if (err.code == 'ENOENT') {
-					var fStream = fs.createWriteStream(fname);
-					return api.download(pkg, versionCode).then(function(res) {
-						res.pipe(fStream);
-						fStream.on('finish', function() {
-							checkApk(fname, listActivities);
-						});
-					}).catch(function() {
-						outputText("--Download error - skipping");
-						getNext();
-					});
-
+			if (db.prepare("SELECT count(*) AS count FROM apps WHERE appId='" + pkg + "'").get().count == 0 || isForce) {
+				if (isForce) {
+					db.prepare("DELETE FROM apps WHERE appId='" + pkg + "'").run();
 				}
-			});
-		}).catch(function(){
+				console.log("\tDownload size: " + dldSize);
+				var fStream = fs.createWriteStream(fname);
+				return api.download(pkg, versionCode).then(function(res) {
+					res.pipe(fStream);
+					fStream.on('finish', function() {
+						db.prepare("INSERT INTO apps VALUES ('" + pkg + "','', " + new Date().getTime() + ")").run();
+						checkApk(fname, listActivities);
+					});
+				}).catch(function() {
+					outputText("--Download error - skipping");
+					getNext();
+				});
+			} else {
+				outputText("--Skipping: Already in DB");
+				getNext();
+			}
+		}).catch(function() {
 			// error
 			console.error("error connecting...wait 5sec");
 			sleep.sleep(5);
-                        api = require('gpapi').GooglePlayAPI({
-                                username: cfg.username,
-                                password: cfg.password,
-                                androidId: cfg.androidId
-                        });
+			api = require('gpapi').GooglePlayAPI({
+				username: cfg.username,
+				password: cfg.password,
+				androidId: cfg.androidId
+			});
 			getNext();
 		})
 }
 
 function checkApk(name, showActivities = false) {
 	try {
-		outputText("Checking " + name);
+		outputText("--Checking " + name);
 		var reader = ApkReader.readFile(name)
 		var manifest = reader.readManifestSync();
 		var act = manifest.application.activities;
@@ -166,7 +184,7 @@ function checkApk(name, showActivities = false) {
 function download(id) {
 	var app = appList[id];
 	if (app) {
-		outputText("Download " + id + ": " + app.title)
+		outputText("Download " + (id + 1) + ": " + app.title)
 		downloadToFile(app.appId, "");
 	}
 }
@@ -174,7 +192,8 @@ function download(id) {
 function getNext() {
 
 	if (framework != "") {
-		outputText(framework);
+		db.prepare("UPDATE apps SET framework='" + framework + "' WHERE appId='" + appId + "'").run();
+		outputText("--Framework: " + framework.green);
 		framework = "";
 	}
 
@@ -199,7 +218,7 @@ function getNext() {
 
 function setFramework(str) {
 	if (framework == "") {
-		framework = "--Framework: " + str.green;
+		framework = str;
 	}
 }
 
@@ -209,7 +228,7 @@ function apkDecompile(file) {
 			outputText("--Extracting " + file + "...");
 			apktool.apkTool_unpack(file, "_out", function(err, result) {
 				if (err) {
-					truncateFile(file);
+					deleteFile(file);
 					getNext();
 				} else {
 					// TODO analyse xmls
@@ -253,7 +272,7 @@ function apkDecompile(file) {
 							}
 							outputText("----" + output.join("<br>----"));
 							rmrf('_out/');
-							truncateFile(file);
+							deleteFile(file);
 							getNext();
 
 						});
@@ -261,16 +280,14 @@ function apkDecompile(file) {
 			})
 		}
 	} else {
-		truncateFile(file);
+		deleteFile(file);
 		getNext();
 	}
 }
 
-function truncateFile(file) {
+function deleteFile(file) {
 	if (clearFile && !isLocal) {
-		fs.truncate(file, 0, function() {
-			console.log('--clearing file')
-		})
+		fs.unlink(file);
 	}
 }
 
@@ -290,8 +307,9 @@ if (argv.local) {
 	isLocal = true;
 	files = [argv.file];
 	checkApk(argv.file, listActivities);
-} else if (argv.appId){
+} else if (argv.appId) {
 	downloadToFile(argv.appId, "");
+	isForce = true;
 } else {
 
 	// https://github.com/facundoolano/google-play-scraper/blob/dev/lib/constants.js#L3

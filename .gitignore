@@ -5,3 +5,4 @@ log_*
 apk/
 www/
 _out/
+database.db
