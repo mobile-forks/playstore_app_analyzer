@@ -1,0 +1,7 @@
+config.js
+*.apk
+node_modules/
+log_*
+apk/
+www/
+_out/

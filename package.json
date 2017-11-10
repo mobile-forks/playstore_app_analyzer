@@ -1,0 +1,28 @@
+{
+  "name": "Playstore App Analyser",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "await-stream-ready": "^1.0.1",
+    "child_process": "^1.0.2",
+    "colors": "^1.1.2",
+    "find-in-files": "^0.4.0",
+    "fs-extra": "^4.0.2",
+    "google-play-scraper": "^3.3.1",
+    "gpapi": "^4.3.1",
+    "minimist": "^1.2.0",
+    "node-apk-parser": "^0.2.3",
+    "node_apktool": "^0.1.0",
+    "rimraf": "^2.6.2",
+    "rmrf": "^1.0.2",
+    "sleep": "^5.1.1",
+    "unzip": "^0.1.11"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": ""
+  },
+  "author": "Michael Gangolf",
+  "license": "MIT License"
+}
