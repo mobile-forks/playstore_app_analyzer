@@ -30,7 +30,7 @@ var COLLECTION = gplay.collection[cfg.collection]
 var DOWNLOAD_COUNT = cfg.downloadCount;
 var COUNTRY = cfg.country;
 
-if  (argv.keepFile || argv.kf); {
+if (argv.keepFile || argv.kf) {
 	clearFile = false;
 }
 if (argv.hideActivities || argv.ha) {
