@@ -245,71 +245,81 @@ function apkDecompile(file) {
 						setFramework("Cordova");
 					}
 
-					// find xamarin
-					var obj = {
-						'term': /xamarin/,
-						'flags': 'ig'
-					};
-					findInFiles.find(obj, '_out/', 'apktool.yml$')
-						.then(function(results) {
-							for (var result in results) {
-								var res = results[result];
-								if (res.count > 0) {
-									setFramework("Xamarin");
+					try {
+						// find xamarin
+						var obj = {
+							'term': /xamarin/,
+							'flags': 'ig'
+						};
+						findInFiles.findSync(obj, '_out/', 'apktool.yml$')
+							.then(function(results) {
+								for (var result in results) {
+									var res = results[result];
+									if (res && res.count > 0) {
+										setFramework("Xamarin");
+									}
 								}
-							}
-						});
+							});
 
-					// find Appcelerator
-					var obj = {
-						'term': /org\/appcelerator\/titanium/,
-						'flags': 'ig'
-					};
-					findInFiles.find(obj, '_out/', 'apktool.yml$')
-						.then(function(results) {
-							for (var result in results) {
-								var res = results[result];
-								if (res.count > 0) {
-									setFramework("Axway Appcelerator");
+						// find Appcelerator
+						var obj = {
+							'term': /org\/appcelerator\/titanium/,
+							'flags': 'ig'
+						};
+						findInFiles.findSync(obj, '_out/', 'apktool.yml$')
+							.then(function(results) {
+								for (var result in results) {
+									var res = results[result];
+									if (res && res.count > 0) {
+										setFramework("Axway Appcelerator");
+									}
 								}
-							}
-						});
+							});
+					} catch (e) {
+						// error
+					}
 
-					// output urls
-					var obj = {
-						'term': /(http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?/,
-						'flags': 'ig'
-					};
-					outputText("--Looking for urls...")
-					findInFiles.find(obj, '_out/', '.xml$')
-						.then(function(results) {
-							var output = [];
-							for (var result in results) {
-								var res = results[result];
-								if (res.matches) {
-									res.matches.forEach(function(match) {
+					try {
+						// output urls
+						var obj = {
+							'term': /(http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?/,
+							'flags': 'ig'
+						};
+						outputText("--Looking for urls...")
+						findInFiles.findSync(obj, '_out/', '.xml$')
+							.then(function(results) {
+								var output = [];
+								for (var result in results) {
+									var res = results[result];
+									if (res && res.matches) {
+										res.matches.forEach(function(match) {
 
-										if (framework == "" && match.indexOf("ns.adobe.com/air/extension/4.0") != -1) {
-											setFramework("Adobe Air");
-										}
+											if (framework == "" && match.indexOf("ns.adobe.com/air/extension/4.0") != -1) {
+												setFramework("Adobe Air");
+											}
 
-										if (output.indexOf(match) < 0 &&
-											match.indexOf("schemas.android.com/") == -1 &&
-											match.indexOf("ns.adobe.com/air/extension/4.0") == -1 &&
-											match.indexOf("https://play.google.com/store/apps/details?id=") == -1 &&
-											match != "http://www.w3.org/2001/XMLSchema-instance"
-										) {
-											output.push(match);
-										}
-									});
+											if (output.indexOf(match) < 0 &&
+												match.indexOf("schemas.android.com/") == -1 &&
+												match.indexOf("ns.adobe.com/air/extension/4.0") == -1 &&
+												match.indexOf("https://play.google.com/store/apps/details?id=") == -1 &&
+												match != "http://www.w3.org/2001/XMLSchema-instance"
+											) {
+												output.push(match);
+											}
+										});
+									}
 								}
-							}
-							outputText("----" + output.join("<br>----"));
-							rmrf('_out/');
-							deleteFile(file);
-							getNext();
+								outputText("----" + output.join("<br>----"));
+								rmrf('_out/');
+								deleteFile(file);
+								getNext();
 
-						});
+							});
+					} catch (e) {
+						rmrf('_out/');
+						deleteFile(file);
+						getNext();
+					}
 				}
 			})
 		}
