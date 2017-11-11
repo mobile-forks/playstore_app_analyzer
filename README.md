@@ -17,6 +17,8 @@ If it is a Cordova/Phonegap app it will check for a www/ folder and copy this to
 * change the playstore settings (see https://github.com/facundoolano/google-play-scraper/blob/dev/lib/constants.js#L3 for values) in `config.js`
 * run `node index.js`
 
+# Info
+The download API will try to install the apps on the device you got the androidID from. So if you don't want to use your device you can use http://www.onyxbits.de/dummydroid to get a dummy GSF ID
 
 # Example/Usage
 ```javascript
